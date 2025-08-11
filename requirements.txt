@@ -1,0 +1,6 @@
+telethon
+pyaes
+pytesseract
+Pillow
+rsa
+pyasn1
