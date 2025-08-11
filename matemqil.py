@@ -7,7 +7,7 @@ from sympy.core.sympify import SympifyError
 import asyncio
 import os
 
-channel_username = 'izatlox1'
+channel_username = 'kurator_kazino'
 
 # Tesseract yo'lini sozlash (Windows uchun)
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -94,3 +94,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
