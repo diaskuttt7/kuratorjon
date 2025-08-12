@@ -6,11 +6,14 @@ from sympy import sympify
 from sympy.core.sympify import SympifyError
 import asyncio
 import os
+import threading
+from flask import Flask
 
-channel_username = 'kurator_kazino'
+channel_username = 'izatlox1'
 
-# Tesseract yo'lini sozlash (Windows uchun)
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# Tesseract yo'lini sozlash (Linux serverda yo'l kerak emas, faqat Windowsda kerak bo‘ladi)
+# Agar Render serverida ishlatsa, bu qatordagi yo‘lni komment qil:
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 accounts = [
     {"session": "account1", "api_id": 20262983, "api_hash": "d233b0bf40f861ce947ec5e95510300e", "message": "8600492921750358"},
@@ -23,14 +26,13 @@ accounts = [
     {"session": "account10", "api_id": 22728247, "api_hash": "88ebe4b74a1d54898c5e5bbafff4860a", "message": "8600492921750358"},
     {"session": "account11", "api_id": 28566120, "api_hash": "7cf1b9616ba2cc76642c7ed9340341ff", "message": "8600492921750358"},
     {"session": "account12", "api_id": 22057723, "api_hash": "af8be812e087e8061b0f8f065ecb9624", "message": "8600492921750358"},
-
 ]
 
 clients = []
 
 def extract_expression(text):
     text = re.sub(r'(?<=\d)\s*[xX]\s*(?=\d)', '*', text)
-    pattern = r'[\d\s\+\-\*/\^\(\)]+'
+    pattern = r'[\d\s\+\-\*/\^\(\)]+' 
     matches = re.findall(pattern, text)
     if matches:
         for m in matches:
@@ -46,11 +48,9 @@ async def handle_event(client):
     async def handler(event):
         raw_text = event.raw_text
 
-        # Agar matn bo‘lsa
         if raw_text.strip():
             expr = extract_expression(raw_text)
         else:
-            # Agar rasm bo‘lsa — yuklab olish
             file_path = await event.download_media()
             if file_path:
                 try:
@@ -58,7 +58,7 @@ async def handle_event(client):
                     raw_text = pytesseract.image_to_string(img)
                     expr = extract_expression(raw_text)
                 finally:
-                    os.remove(file_path)  # vaqtinchalik faylni o‘chiramiz
+                    os.remove(file_path)
             else:
                 expr = None
 
@@ -92,8 +92,19 @@ async def main():
     print("🤖 Hammasi ishga tushdi. Kanal kuzatilyapti...")
     await asyncio.gather(*(client.run_until_disconnected() for client in clients))
 
-if __name__ == "__main__":
+# Flask server (Render uchun port ochish)
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot ishlayapti!"
+
+def run_flask():
+    app.run(host="0.0.0.0", port=10000)
+
+def run_bot():
     asyncio.run(main())
 
-
-
+if __name__ == "__main__":
+    threading.Thread(target=run_bot).start()
+    run_flask()
