@@ -7,7 +7,7 @@ from sympy.core.sympify import SympifyError
 import asyncio
 import os
 
-channel_username = 'izatlox1'
+channel_username = 'kurator_kazino'
 
 # Tesseract yo'lini sozlash (Linux server uchun yo'l — agar serverda bo'lmasa olib tashlash mumkin)
 # Agar serverda tesseract o‘rnatilgan bo‘lsa, quyidagisini qo‘llash mumkin:
@@ -103,3 +103,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
