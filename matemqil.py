@@ -6,14 +6,12 @@ from sympy import sympify
 from sympy.core.sympify import SympifyError
 import asyncio
 import os
-import threading
-from flask import Flask
 
 channel_username = 'izatlox1'
 
-# Tesseract yo'lini sozlash (Linux serverda yo'l kerak emas, faqat Windowsda kerak bo‘ladi)
-# Agar Render serverida ishlatsa, bu qatordagi yo‘lni komment qil:
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# Tesseract yo'lini sozlash (Linux server uchun yo'l — agar serverda bo'lmasa olib tashlash mumkin)
+# Agar serverda tesseract o‘rnatilgan bo‘lsa, quyidagisini qo‘llash mumkin:
+# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 accounts = [
     {"session": "account1", "api_id": 20262983, "api_hash": "d233b0bf40f861ce947ec5e95510300e", "message": "8600492921750358"},
@@ -32,7 +30,7 @@ clients = []
 
 def extract_expression(text):
     text = re.sub(r'(?<=\d)\s*[xX]\s*(?=\d)', '*', text)
-    pattern = r'[\d\s\+\-\*/\^\(\)]+' 
+    pattern = r'[\d\s\+\-\*/\^\(\)]+'  # faqat matematik belgilar
     matches = re.findall(pattern, text)
     if matches:
         for m in matches:
@@ -79,10 +77,21 @@ async def handle_event(client):
         except Exception as e:
             print(f"[{client.session.filename}] ⚠️ Xatolik: {e}")
 
+async def periodic_task(client, message, interval=60):
+    """Har interval sekundda so‘rov yuboradi"""
+    while True:
+        try:
+            await client.send_message(channel_username, message)
+            print(f"[{client.session.filename}] ⏳ Yuborildi: {message}")
+        except Exception as e:
+            print(f"[{client.session.filename}] ❌ Yuborishda xatolik: {e}")
+        await asyncio.sleep(interval)
+
 async def start_client(acc):
     client = TelegramClient(acc['session'], acc['api_id'], acc['api_hash'])
     await client.start()
     await handle_event(client)
+    asyncio.create_task(periodic_task(client, acc['message'], 60))
     print(f"🔗 {acc['session']} ulandi.")
     return client
 
@@ -92,19 +101,5 @@ async def main():
     print("🤖 Hammasi ishga tushdi. Kanal kuzatilyapti...")
     await asyncio.gather(*(client.run_until_disconnected() for client in clients))
 
-# Flask server (Render uchun port ochish)
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Bot ishlayapti!"
-
-def run_flask():
-    app.run(host="0.0.0.0", port=10000)
-
-def run_bot():
-    asyncio.run(main())
-
 if __name__ == "__main__":
-    threading.Thread(target=run_bot).start()
-    run_flask()
+    asyncio.run(main())
