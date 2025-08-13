@@ -7,7 +7,7 @@ from sympy.core.sympify import SympifyError
 import asyncio
 import os
 
-channel_username = 'izatlox1'
+channel_username = 'kurator_kazino'
 
 # Tesseract yo'lini sozlash (serverda bo'lmasa olib tashlash mumkin)
 # pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
@@ -106,3 +106,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
