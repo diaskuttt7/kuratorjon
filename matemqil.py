@@ -1,7 +1,7 @@
 import re
 import pytesseract
 from PIL import Image
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, errors
 from sympy import sympify
 from sympy.core.sympify import SympifyError
 import asyncio
@@ -9,8 +9,7 @@ import os
 
 channel_username = 'izatlox1'
 
-# Tesseract yo'lini sozlash (Linux server uchun yo'l — agar serverda bo'lmasa olib tashlash mumkin)
-# Agar serverda tesseract o‘rnatilgan bo‘lsa, quyidagisini qo‘llash mumkin:
+# Tesseract yo'lini sozlash (serverda bo'lmasa olib tashlash mumkin)
 # pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 accounts = [
@@ -30,7 +29,7 @@ clients = []
 
 def extract_expression(text):
     text = re.sub(r'(?<=\d)\s*[xX]\s*(?=\d)', '*', text)
-    pattern = r'[\d\s\+\-\*/\^\(\)]+'  # faqat matematik belgilar
+    pattern = r'[\d\s\+\-\*/\^\(\)]+'
     matches = re.findall(pattern, text)
     if matches:
         for m in matches:
@@ -77,22 +76,26 @@ async def handle_event(client):
         except Exception as e:
             print(f"[{client.session.filename}] ⚠️ Xatolik: {e}")
 
-async def periodic_task(client, message, interval=60):
-    """Har interval sekundda so‘rov yuboradi"""
+async def check_subscription(client, interval=60):
+    """Har interval sekundda kanalga obuna bo‘lishini tekshiradi"""
     while True:
         try:
-            await client.send_message(channel_username, message)
-            print(f"[{client.session.filename}] ⏳ Yuborildi: {message}")
+            participant = await client.get_participant(channel_username, 'me')
+            if participant:
+                print(f"[{client.session.filename}] ✅ Kanalga obuna bo‘lingan")
+        except errors.UserNotParticipantError:
+            print(f"[{client.session.filename}] ❌ Kanalga obuna emas")
         except Exception as e:
-            print(f"[{client.session.filename}] ❌ Yuborishda xatolik: {e}")
+            print(f"[{client.session.filename}] ⚠️ Xatolik obuna tekshirishda: {e}")
         await asyncio.sleep(interval)
 
 async def start_client(acc):
     client = TelegramClient(acc['session'], acc['api_id'], acc['api_hash'])
     await client.start()
     await handle_event(client)
-    asyncio.create_task(periodic_task(client, acc['message'], 60))
-    print(f"🔗 {acc['session']} ulandi.")
+    # Har 60 soniyada obuna tekshiruvchi task
+    asyncio.create_task(check_subscription(client))
+    print(f"🔗 {acc['session']} ulandi va obuna tekshirish boshlandi.")
     return client
 
 async def main():
@@ -103,5 +106,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
