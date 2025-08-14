@@ -6,11 +6,10 @@ from sympy import sympify
 from sympy.core.sympify import SympifyError
 import asyncio
 import os
+from flask import Flask
+import threading
 
 channel_username = 'izatlox1'
-
-# Tesseract yo'lini sozlash (serverda bo'lmasa olib tashlash mumkin)
-# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 accounts = [
     {"session": "account1", "api_id": 20262983, "api_hash": "d233b0bf40f861ce947ec5e95510300e", "message": "1346239969"},
@@ -30,7 +29,7 @@ clients = []
 
 def extract_expression(text):
     text = re.sub(r'(?<=\d)\s*[xX]\s*(?=\d)', '*', text)
-    pattern = r'[\d\s\+\-\*/\^\(\)]+'
+    pattern = r'[\d\s\+\-\*/\^\(\)]+' 
     matches = re.findall(pattern, text)
     if matches:
         for m in matches:
@@ -45,7 +44,6 @@ async def handle_event(client):
     @client.on(events.NewMessage(chats=channel_username))
     async def handler(event):
         raw_text = event.raw_text
-
         if raw_text.strip():
             expr = extract_expression(raw_text)
         else:
@@ -78,7 +76,6 @@ async def handle_event(client):
             print(f"[{client.session.filename}] ⚠️ Xatolik: {e}")
 
 async def check_subscription(client, interval=60):
-    """Har interval sekundda kanalga obuna bo‘lishini tekshiradi"""
     while True:
         try:
             participant = await client.get_participant(channel_username, 'me')
@@ -94,20 +91,27 @@ async def start_client(acc):
     client = TelegramClient(acc['session'], acc['api_id'], acc['api_hash'])
     await client.start()
     await handle_event(client)
-    # Har 60 soniyada obuna tekshiruvchi task
     asyncio.create_task(check_subscription(client))
     print(f"🔗 {acc['session']} ulandi va obuna tekshirish boshlandi.")
     return client
 
-async def main():
+async def telegram_main():
     global clients
     clients = await asyncio.gather(*(start_client(acc) for acc in accounts))
     print("🤖 Hammasi ishga tushdi. Kanal kuzatilyapti...")
     await asyncio.gather(*(client.run_until_disconnected() for client in clients))
 
+# Flask web server (Render uchun)
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot ishlayapti!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
 if __name__ == "__main__":
-    asyncio.run(main())
-
-
-
-
+    threading.Thread(target=run_flask).start()
+    asyncio.run(telegram_main())
