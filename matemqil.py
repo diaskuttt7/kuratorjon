@@ -9,7 +9,7 @@ import os
 from flask import Flask
 import threading
 
-channel_username = 'kurator_kazino'
+channel_username = 'izatlox1'
 
 accounts = [
     {"session": "account1", "api_id": 20262983, "api_hash": "d233b0bf40f861ce947ec5e95510300e", "message": "1346239969"},
@@ -115,4 +115,5 @@ def run_flask():
 if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
     asyncio.run(telegram_main())
+
 
