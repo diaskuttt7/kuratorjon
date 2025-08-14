@@ -13,16 +13,17 @@ channel_username = 'izatlox1'
 # pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 accounts = [
-    {"session": "account1", "api_id": 20262983, "api_hash": "d233b0bf40f861ce947ec5e95510300e", "message": "8600492921750358"},
+    {"session": "account1", "api_id": 20262983, "api_hash": "d233b0bf40f861ce947ec5e95510300e", "message": "1346239969"},
     {"session": "account2", "api_id": 23345424, "api_hash": "093c1d9f5afcbcc0bb2e4eeada7cc47c", "message": "8600492921750358"},
-    {"session": "account3", "api_id": 22727007, "api_hash": "7164ad110301ab18610533095363a810", "message": "8600492921750358"},
-    {"session": "account5", "api_id": 27214718, "api_hash": "30c6c94c68567a650b7cf4ec2ee10e9e", "message": "8600492921750358"},
-    {"session": "account6", "api_id": 13195192, "api_hash": "ca944410b25fb1e852d8c9f934759e9d", "message": "8600492921750358"},
-    {"session": "account7", "api_id": 27187404, "api_hash": "b5e0ce0579333c3c0ef85f7d6e6d1cfd", "message": "8600492921750358"},
-    {"session": "account9", "api_id": 24106437, "api_hash": "fef55023c1c956694948afeb0822040a", "message": "8600492921750358"},
-    {"session": "account10", "api_id": 22728247, "api_hash": "88ebe4b74a1d54898c5e5bbafff4860a", "message": "8600492921750358"},
+    {"session": "account3", "api_id": 27214718, "api_hash": "30c6c94c68567a650b7cf4ec2ee10e9e", "message": "8600492921750358"},
+    {"session": "account4", "api_id": 13195192, "api_hash": "ca944410b25fb1e852d8c9f934759e9d", "message": "8600492921750358"},
+    {"session": "account5", "api_id": 27187404, "api_hash": "b5e0ce0579333c3c0ef85f7d6e6d1cfd", "message": "8600492921750358"},
+    {"session": "account6", "api_id": 24106437, "api_hash": "fef55023c1c956694948afeb0822040a", "message": "8600492921750358"},
+    {"session": "account7", "api_id": 22728247, "api_hash": "88ebe4b74a1d54898c5e5bbafff4860a", "message": "8600492921750358"},
     {"session": "account11", "api_id": 28566120, "api_hash": "7cf1b9616ba2cc76642c7ed9340341ff", "message": "8600492921750358"},
     {"session": "account12", "api_id": 22057723, "api_hash": "af8be812e087e8061b0f8f065ecb9624", "message": "8600492921750358"},
+    {"session": "account13", "api_id": 21193912, "api_hash": "0ae43a2d7488d361d07c1fd8ef78937d", "message": "8600492921750358"},
+    {"session": "account14", "api_id": 25478196, "api_hash": "9f9616e18fb22b17e4a4ece1903ecdbd", "message": "8600492921750358"},
 ]
 
 clients = []
@@ -106,6 +107,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
 
