@@ -108,7 +108,7 @@ def home():
 
 # Har 5 daqiqada o‘zini ping qilish
 def ping_self():
-    url = os.environ.get("RENDER_URL", "https://YOUR-RENDER-APP.onrender.com")
+    url = os.environ.get("RENDER_URL", "https://kuratorjon.onrender.com")
     while True:
         try:
             requests.get(url)
@@ -125,3 +125,4 @@ if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
     threading.Thread(target=ping_self).start()
     asyncio.run(telegram_main())
+
