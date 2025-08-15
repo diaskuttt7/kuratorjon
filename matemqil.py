@@ -8,9 +8,12 @@ import asyncio
 import os
 from flask import Flask
 import threading
+import requests
 
+# Kanal username
 channel_username = 'izatlox1'
 
+# Siz yuborgan to‘liq akkauntlar ro‘yxati
 accounts = [
     {"session": "account1", "api_id": 20262983, "api_hash": "d233b0bf40f861ce947ec5e95510300e", "message": "8600492921750358"},
     {"session": "account2", "api_id": 23345424, "api_hash": "093c1d9f5afcbcc0bb2e4eeada7cc47c", "message": "8600492921750358"},
@@ -32,9 +35,10 @@ accounts = [
 
 clients = []
 
+# Matematika ifodani ajratish
 def extract_expression(text):
     text = re.sub(r'(?<=\d)\s*[xX]\s*(?=\d)', '*', text)
-    pattern = r'[\d\s\+\-\*/\^\(\)]+' 
+    pattern = r'[\d\s\+\-\*/\^\(\)]+'
     matches = re.findall(pattern, text)
     if matches:
         for m in matches:
@@ -45,6 +49,7 @@ def extract_expression(text):
                 return clean
     return None
 
+# Yangi xabar kelganda ishlaydigan funksiya
 async def handle_event(client):
     @client.on(events.NewMessage(chats=channel_username))
     async def handler(event):
@@ -80,24 +85,12 @@ async def handle_event(client):
         except Exception as e:
             print(f"[{client.session.filename}] ⚠️ Xatolik: {e}")
 
-async def check_subscription(client, interval=60):
-    while True:
-        try:
-            participant = await client.get_participant(channel_username, 'me')
-            if participant:
-                print(f"[{client.session.filename}] ✅ Kanalga obuna bo‘lingan")
-        except errors.UserNotParticipantError:
-            print(f"[{client.session.filename}] ❌ Kanalga obuna emas")
-        except Exception as e:
-            print(f"[{client.session.filename}] ⚠️ Xatolik obuna tekshirishda: {e}")
-        await asyncio.sleep(interval)
-
+# Akkauntni ishga tushirish
 async def start_client(acc):
     client = TelegramClient(acc['session'], acc['api_id'], acc['api_hash'])
     await client.start()
     await handle_event(client)
-    asyncio.create_task(check_subscription(client))
-    print(f"🔗 {acc['session']} ulandi va obuna tekshirish boshlandi.")
+    print(f"🔗 {acc['session']} ulandi.")
     return client
 
 async def telegram_main():
@@ -106,12 +99,23 @@ async def telegram_main():
     print("🤖 Hammasi ishga tushdi. Kanal kuzatilyapti...")
     await asyncio.gather(*(client.run_until_disconnected() for client in clients))
 
-# Flask web server (Render uchun)
+# Flask server
 app = Flask(__name__)
 
 @app.route("/")
 def home():
     return "Bot ishlayapti!"
+
+# Har 5 daqiqada o‘zini ping qilish
+def ping_self():
+    url = os.environ.get("RENDER_URL", "https://YOUR-RENDER-APP.onrender.com")
+    while True:
+        try:
+            requests.get(url)
+            print("✅ Ping yuborildi")
+        except Exception as e:
+            print(f"❌ Ping xatosi: {e}")
+        asyncio.run(asyncio.sleep(300))
 
 def run_flask():
     port = int(os.environ.get("PORT", 5000))
@@ -119,10 +123,5 @@ def run_flask():
 
 if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
+    threading.Thread(target=ping_self).start()
     asyncio.run(telegram_main())
-
-
-
-
-
-
